@@ -21,6 +21,9 @@ export default (sequelize, DataTypes) => (
     passwordResetExpiry: {
       type: DataTypes.DATE,
     },
+    refreshToken: {
+      type: DataTypes.STRING,
+    },
   }, {
     paranoid: true,
     timestamps: true,

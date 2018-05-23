@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import compression from 'compression';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import passport from 'passport';
-import './passport';
+import initializePassport from './passport';
 import models from './models';
 import schema from './schema';
 import authApi from './api/auth';
@@ -16,6 +16,7 @@ app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
+initializePassport();
 
 app.use('/graphql', graphqlExpress({ schema, cacheControl: true }));
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
@@ -36,7 +37,7 @@ app.use((error, req, res) => {
   res.status(error.status || 500).send(error);
 });
 
-models.sequelize.sync({}).then(() => {
+models.sequelize.sync({ force: false }).then(() => {
   app.listen(8081, () => {
     console.log('Server started!');
   });

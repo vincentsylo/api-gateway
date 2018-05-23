@@ -1,37 +1,53 @@
 import passport from 'passport';
 import passportJwt from 'passport-jwt';
 import { Strategy as LocalStrategy } from 'passport-local';
-// import models from './models';
+import bcrypt from 'bcrypt';
+import models from './models';
 
-const { ExtractJwt, Strategy: JwtStrategy } = passportJwt;
+export const getJwtPayload = user => ({
+  id: user.id,
+});
 
-passport.use(new LocalStrategy({
-  usernameField: 'email',
-  passwordField: 'password',
-}, async (email, password, cb) => {
-  try {
-    // const user = await models.user.findOne({ email, password });
-    const user = { email: 'test', password: 'test' };
+export default () => {
+  const { ExtractJwt, Strategy: JwtStrategy } = passportJwt;
 
-    if (!user) {
-      return cb(null, false);
+  passport.use(new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password',
+  }, async (email, password, done) => {
+    try {
+      const user = await models.user.findOne({
+        where: { email },
+        attributes: ['id', 'hash'],
+      });
+      const success = await bcrypt.compare(password, user.hash);
+      if (!success) {
+        return done(null, false);
+      }
+
+      const jwtPayload = getJwtPayload(user);
+      return done(null, jwtPayload);
+    } catch (err) {
+      return done(err);
     }
+  }));
 
-    return cb(null, user);
-  } catch (err) {
-    return cb(err);
-  }
-}));
+  passport.use(new JwtStrategy({
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.JWT_SECRET,
+    ignoreExpiration: true,
+  }, async (jwtPayload, done) => {
+    try {
+      const currentTime = new Date().getTime() / 1000;
 
-passport.use(new JwtStrategy({
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
-}, async (jwtPayload, cb) => {
-  try {
-    // const user = await models.user.findById(jwtPayload.id);
-    const user = { email: 'test', password: 'test' };
-    return cb(null, user);
-  } catch (err) {
-    return cb(err);
-  }
-}));
+      if (currentTime > jwtPayload.exp) {
+        console.log('Expired!', currentTime, jwtPayload.exp);
+        return done(null, false);
+      }
+
+      return done(null, jwtPayload);
+    } catch (err) {
+      return done(err);
+    }
+  }));
+};
