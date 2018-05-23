@@ -1,14 +1,12 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
-import passport from 'passport';
 
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
   res.send('respond with a resource');
 });
 
-router.get('/profile', (req, res, next) => {
+router.get('/profile', (req, res) => {
   res.send(req.user);
 });
 

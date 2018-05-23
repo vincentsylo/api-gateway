@@ -4,8 +4,8 @@ import passport from 'passport';
 
 const router = express.Router();
 
-router.post('/login', passport.authenticate('local', { session: false }), (req, res, next) => {
-  const user = req.user;
+router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
+  const { user } = req;
 
   req.login(user, { session: false }, (err) => {
     if (err) {

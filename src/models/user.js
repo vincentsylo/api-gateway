@@ -1,5 +1,5 @@
-export default (sequelize, DataTypes) => {
-  return sequelize.define('user', {
+export default (sequelize, DataTypes) => (
+  sequelize.define('user', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV1,
@@ -24,5 +24,5 @@ export default (sequelize, DataTypes) => {
   }, {
     paranoid: true,
     timestamps: true,
-  });
-}
+  })
+);

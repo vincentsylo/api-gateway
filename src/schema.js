@@ -1,4 +1,5 @@
 import { makeExecutableSchema } from 'graphql-tools';
+import _ from 'lodash';
 
 const books = [
   {
@@ -17,7 +18,7 @@ const typeDefs = `
 `;
 
 const resolvers = {
-  Query: { books: (root, args) => args && args.limit ? books.slice(0, args.limit) : books },
+  Query: { books: (root, args) => (_.get(args, 'limit') ? books.slice(0, args.limit) : books) },
 };
 
 export default makeExecutableSchema({
