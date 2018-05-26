@@ -53,6 +53,6 @@ app.use((error, req, res) => {
 
 models.sequelize.sync({ force: false }).then(() => {
   app.listen(8081, () => {
-    console.log('Server started!');
+    console.log('*** Server started ***'); // eslint-disable-line
   });
 });

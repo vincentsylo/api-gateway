@@ -10,11 +10,11 @@ export default {
     ),
   },
   Mutation: {
-    registerUser: (root, args, { models }) => models.user.registerUser(models, args),
-    login: (root, args, { models }) => models.user.login(models, args.email, args.password),
+    registerUser: (root, args, { models }) => models.user.actions.registerUser(models, args),
+    login: (root, args, { models }) => models.user.actions.login(models, args.email, args.password),
     refreshAccessToken: (root, args, { models, jwtPayload }) => {
       const { id } = jwtPayload;
-      return id ? models.user.refreshAccessToken(models, id, args.refreshToken) : null;
+      return id ? models.user.actions.refreshAccessToken(models, id, args.refreshToken) : null;
     },
   },
 };

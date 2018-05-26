@@ -11,7 +11,7 @@ const sequelize = new Sequelize(
 );
 
 const models = {
-  user: sequelize.import('./user.js'),
+  user: sequelize.import('./user/index.js'),
 };
 
 _.each(models, (model, key) => {
