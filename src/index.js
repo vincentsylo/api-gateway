@@ -3,29 +3,43 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
-import passport from 'passport';
-import initializePassport from './passport';
+import _ from 'lodash';
+import jwt from 'jsonwebtoken';
 import models from './models';
 import schema from './schema';
-import authApi from './api/auth';
-import userApi from './api/user';
 
 const app = express();
 
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(passport.initialize());
-initializePassport();
 
-app.use('/graphql', graphqlExpress({ schema, cacheControl: true }));
-app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
+app.use(
+  '/graphql',
+  graphqlExpress((req) => {
+    const { authorization } = req.headers;
+    const jwtPayload = authorization ? jwt.verify(_.replace(authorization, 'Bearer ', ''), process.env.JWT_SECRET, { ignoreExpiration: true }) : null;
+    const currentTime = new Date().getTime() / 1000;
+    const user = jwtPayload && currentTime > jwtPayload.exp ? null : jwtPayload;
+
+    return {
+      schema,
+      context: {
+        models,
+        jwtPayload,
+        user,
+      },
+    };
+  }),
+);
+app.use(
+  '/graphiql',
+  graphiqlExpress({ endpointURL: '/graphql' }),
+);
 
 app.get('/', (req, res) => {
   res.send('Hello world!');
 });
-app.use('/api/auth', authApi);
-app.use('/api/user', passport.authenticate('jwt', { session: false }), userApi);
 
 app.use((req, res, next) => {
   const error = new Error('Page not found.');
