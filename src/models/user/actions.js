@@ -58,8 +58,13 @@ export default {
     }
   },
 
-  refreshAccessToken: async (models, userId, refreshToken) => {
+  refreshAccessToken: async (models, jwtPayload, refreshToken) => {
+    if (!refreshToken || !jwtPayload) {
+      throw new Error('Unauthenticated.');
+    }
+
     try {
+      const { id: userId } = jwtPayload;
       const user = await models.user.findOne({
         where: { id: userId, refreshToken },
         attributes: ['id'],
