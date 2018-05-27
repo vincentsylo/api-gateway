@@ -1,5 +1,5 @@
 export default {
-  isAuthenticated: (resolve, source, args, { user }) => {
+  isAuthenticated: (resolve, root, args, { user }) => {
     if (!user) {
       throw new Error('Unauthenticated');
     }
