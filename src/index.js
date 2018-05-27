@@ -20,7 +20,7 @@ app.use(
     const { authorization } = req.headers;
     const jwtPayload = authorization ? jwt.verify(_.replace(authorization, 'Bearer ', ''), process.env.JWT_SECRET, { ignoreExpiration: true }) : null;
     const currentTime = new Date().getTime() / 1000;
-    const user = jwtPayload && currentTime > jwtPayload.exp ? null : jwtPayload;
+    const user = _.get(jwtPayload, 'exp', 0) > currentTime ? jwtPayload : null;
 
     return {
       schema,
@@ -36,10 +36,6 @@ app.use(
   '/graphiql',
   graphiqlExpress({ endpointURL: '/graphql' }),
 );
-
-app.get('/', (req, res) => {
-  res.send('Hello world!');
-});
 
 app.use((req, res, next) => {
   const error = new Error('Page not found.');

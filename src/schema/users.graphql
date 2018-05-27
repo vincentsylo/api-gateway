@@ -9,7 +9,7 @@ type Token {
 }
 
 type Query {
-  profile: User
+  profile: User @isAuthenticated
 }
 
 type Mutation {
